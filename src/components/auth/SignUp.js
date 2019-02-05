@@ -1,4 +1,7 @@
+import { connect } from "react-redux";
 import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+import { signUp } from "../../store/actions/authActions";
 
 class SignUp extends Component {
   state = {
@@ -12,12 +15,19 @@ class SignUp extends Component {
   };
   handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state);
+    this.props.signUp(this.state);
   };
   render() {
+    const { auth, authError } = this.props;
+    if (auth.uid) {
+      return <Redirect to="/" />;
+    }
     return (
       <div className="container">
         <form onSubmit={this.handleSubmit} className="white">
+          <div className="red-text center">
+            {authError ? <p>{authError}</p> : null}
+          </div>
           <h5 className="grey-text text-darken-3">Sign Up</h5>
           <hr />
           <div className="input-field">
@@ -27,6 +37,8 @@ class SignUp extends Component {
               id="firstName"
               onChange={this.handleChange}
               value={this.state.firstName}
+              pattern="[A-Za-z]{1,10}"
+              required
             />
           </div>
           <div className="input-field">
@@ -36,6 +48,8 @@ class SignUp extends Component {
               id="lastName"
               onChange={this.handleChange}
               value={this.state.lastName}
+              pattern="[A-Za-z]{1,10}"
+              required
             />
           </div>
           <div className="input-field">
@@ -45,6 +59,7 @@ class SignUp extends Component {
               id="email"
               onChange={this.handleChange}
               value={this.state.email}
+              required
             />
           </div>
           <div className="input-field">
@@ -54,6 +69,7 @@ class SignUp extends Component {
               id="password"
               onChange={this.handleChange}
               value={this.state.password}
+              required
             />
           </div>
           <button className="btn success lighten-1 z-depth-0">Sign Up</button>
@@ -63,4 +79,20 @@ class SignUp extends Component {
   }
 }
 
-export default SignUp;
+const mapStateToprops = state => {
+  return {
+    auth: state.firebase.auth,
+    authError: state.auth.authError
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    signUp: newUser => dispatch(signUp(newUser))
+  };
+};
+
+export default connect(
+  mapStateToprops,
+  mapDispatchToProps
+)(SignUp);
